@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: python-devops-api
+  labels:
+    app: python-devops-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: python-devops-api
+  template:
+    metadata:
+      labels:
+        app: python-devops-api
+    spec:
+      containers:
+      - name: api
+        image: python-devops-api:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: ENV
+          value: "production"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
