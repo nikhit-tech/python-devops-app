@@ -99,6 +99,98 @@ python-devops-app/
    docker-compose ps
    ```
 
+## Stopping the Application
+
+### How to Identify if Application is Running
+
+1. **Check running containers:**
+   ```bash
+   docker-compose ps
+   # Look for containers with names starting with "python-devops-app-"
+   ```
+
+2. **Check listening ports:**
+   ```bash
+   netstat -tlnp 2>/dev/null | grep -E ":(8000|19090|3000|5432|6379)"
+   # Should show ports 8000, 19090, 3000, 5432, 6379 if running
+   ```
+
+3. **Check Docker containers:**
+   ```bash
+   docker ps | grep python-devops-app
+   ```
+
+### How to Stop the Application Gracefully
+
+1. **Stop all services:**
+   ```bash
+   docker-compose down
+   ```
+
+2. **Verify all containers are stopped:**
+   ```bash
+   docker-compose ps
+   # Should show no running containers
+   ```
+
+3. **Verify ports are no longer listening:**
+   ```bash
+   netstat -tlnp 2>/dev/null | grep -E ":(8000|19090|3000|5432|6379)"
+   # Should return empty (no output)
+   ```
+
+### Cleanup Steps
+
+The `docker-compose down` command handles most cleanup automatically:
+
+- **Stopped containers:** All application containers are stopped and removed
+- **Networks:** Docker networks are removed
+- **Ports:** All application ports (8000, 19090, 3000, 5432, 6379) are released
+
+**Optional additional cleanup:**
+
+1. **Remove data volumes (WARNING: This deletes all data):**
+   ```bash
+   docker-compose down -v
+   # This will delete PostgreSQL and Grafana data
+   ```
+
+2. **Remove Docker images (if you want to reclaim space):**
+   ```bash
+   docker-compose down --rmi all
+   # This removes all images built for this project
+   ```
+
+3. **Force cleanup of unused Docker resources:**
+   ```bash
+   docker system prune -f
+   # Removes stopped containers, unused networks, and dangling images
+   ```
+
+### Troubleshooting Stopping Issues
+
+**If containers won't stop:**
+```bash
+# Force stop all containers
+docker-compose kill
+
+# Remove containers by force
+docker-compose rm -f
+```
+
+**If ports are still in use:**
+```bash
+# Find processes using the ports
+sudo lsof -i :8000
+sudo lsof -i :19090
+sudo lsof -i :3000
+sudo lsof -i :5432
+sudo lsof -i :6379
+
+# Kill the processes (replace <PID> with actual process ID)
+sudo kill -9 <PID>
+```
+
 ### Service Access Points
 
 | Service | Port | URL | Description |
